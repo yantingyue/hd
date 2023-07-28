@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -16,75 +17,125 @@ import (
 type ReplaceResp struct {
 	Code int32  `json:"code"`
 	Msg  string `json:"msg"`
+	Data struct {
+		OnSaleStatus       uint32 `json:"on_sale_status"`
+		CurrentMilliTime   uint64 `json:"current_milli_time"`
+		StartTimeTimestamp uint64 `json:"start_time_timestamp"`
+		EndTimestamp       uint64 `json:"end_time_timestamp"`
+	} `json:"data"`
+}
+type ReplaceTimeResp struct {
+	Code             int32  `json:"code"`
+	Msg              string `json:"msg"`
+	CurrentMilliTime uint64 `json:"current_milli_time"`
 }
 
 func main() {
-	go Token1()
-	go Token2()
-	//go Token3()
+
+	go Fj()
 	select {}
 }
 
-var TT = time.NewTicker(time.Millisecond * 100)
+const (
+	b       = 2 //1是分解 2是置换
+	actId   = 439
+	Token   = "2ac461a1756a4b92b28b77c2ab9af730"
+	OrderId = 17537179 //yh
+	thread  = 1
+)
 
-//var TT = time.NewTicker(time.Millisecond * 500)
-
-func Token1() {
+func Fj() {
 	go func() {
-		defer panicRecover()
-		defer TT.Stop()
 		for {
-			<-TT.C
-			go func() {
-				defer panicRecover()
-				fmt.Println(1111)
-				if Replace(412, 40878538, "d76fa8fd19d84d769bce85e06390ac40") {
-					time.Sleep(time.Second * 2)
+			//分解
+			if b == 1 {
+				for i := 0; i < thread; i++ {
+					go func() {
+						if FjDetail(actId, Token) {
+							go Replace(actId, 17537179, "8ee47dcf94624403b2b4b03eaa655f1a") //大号
+							//go Replace(actId, 17537179, "2ac461a1756a4b92b28b77c2ab9af730") //小号
+						}
+					}()
+					time.Sleep(time.Millisecond * 20)
 				}
-				fmt.Println(44444)
-				if Replace(412, 40878970, "d76fa8fd19d84d769bce85e06390ac40") {
-					time.Sleep(time.Second * 2)
+			}
+			//置换
+			if b == 2 {
+				for i := 0; i < thread; i++ {
+					go func() {
+						if ReplaceDetail(actId, Token) {
+							Replace(actId, OrderId, Token)
+						}
+					}()
+					time.Sleep(time.Millisecond * 20)
 				}
-			}()
+			}
 		}
 	}()
-}
-func Token2() {
-	go func() {
-		defer panicRecover()
-		defer TT.Stop()
 
-		for {
-			<-TT.C
-			go func() {
-				defer panicRecover()
-				fmt.Println(2222)
-				_ = Replace(412, 40878144, "7b7bebc482b34c429026d6e7b09c08f8")
-			}()
-		}
-	}()
-}
-func Token3() {
-	go func() {
-		defer panicRecover()
-		defer TT.Stop()
-		for {
-			<-TT.C
-			go func() {
-				defer panicRecover()
-				fmt.Println(33333)
-				_ = Replace(412, 40878614, "035c5639f15c44f9b838d38e242399ed")
-			}()
-		}
-	}()
 }
 
-var panicRecover = func() {
-	if err := recover(); err != nil {
-		log.Println("panic err", err)
+func FjDetail(id uint64, token string) bool {
+	header := GenerateHeader1(token)
+	body := map[string]interface{}{
+		"replace_id": id,
 	}
+	jsonBytes, _ := json.Marshal(body)
+	resp, _ := Post("https://api.aichaoliuapp.cn/aiera/ai_match_trading/nft/replace/active/detail", header, jsonBytes)
+	log.Println(string(resp))
+	if len(resp) == 0 {
+		return false
+	}
+	res := ReplaceResp{}
+	json.Unmarshal(resp, &res)
+	if res.Code == 0 && res.Msg == "success" && res.Data.OnSaleStatus == 1 {
+		return true
+	}
+	return false
 }
-
+func ReplaceDetail(id uint64, token string) bool {
+	header := GenerateHeader1(token)
+	body := map[string]interface{}{
+		"replace_id": id,
+	}
+	jsonBytes, _ := json.Marshal(body)
+	var (
+		wg        sync.WaitGroup
+		resDetail = ReplaceResp{}
+		resTime   = ReplaceTimeResp{}
+		resp1     []byte
+		resp2     = make(map[string]interface{})
+	)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		resp1, _ = Post("https://api.aichaoliuapp.cn/aiera/ai_match_trading/nft/replace/active/detail", header, jsonBytes)
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		resp2, _ = Get("https://api.aichaoliuapp.cn/aiera/current/milli/time")
+	}()
+	wg.Wait()
+	if len(resp1) == 0 || len(resp2) == 0 {
+		return false
+	}
+	json.Unmarshal(resp1, &resDetail)
+	g, _ := json.Marshal(resp2)
+	json.Unmarshal(g, &resTime)
+	//resDetail.Data.StartTimeTimestamp = 1689605160000
+	diffTime := resDetail.Data.StartTimeTimestamp - resTime.CurrentMilliTime
+	log.Println(resDetail.Data.StartTimeTimestamp, resTime.CurrentMilliTime, diffTime)
+	if diffTime < 50 && diffTime > 0 {
+		//time.Sleep(time.Millisecond * time.Duration(diffTime))
+		log.Println(diffTime, resTime.CurrentMilliTime, resDetail.Data.StartTimeTimestamp, time.Now().UnixMilli())
+		return true
+	}
+	if resDetail.Code == 0 && resDetail.Msg == "success" && resTime.CurrentMilliTime >= resDetail.Data.StartTimeTimestamp && resTime.CurrentMilliTime <= resDetail.Data.EndTimestamp {
+		return true
+	}
+	return false
+}
 func Replace(id, orderId uint64, token string) bool {
 	header := GenerateHeader1(token)
 	body := map[string]interface{}{
@@ -93,8 +144,8 @@ func Replace(id, orderId uint64, token string) bool {
 	}
 	jsonBytes, _ := json.Marshal(body)
 	resp, _ := Post("https://api.aichaoliuapp.cn/aiera/ai_match_trading/nft/replace/active/exchange", header, jsonBytes)
-	log.Println(orderId, string(resp))
-	//fmt.Println(orderId, string(resp))
+
+	log.Println(orderId, string(resp), time.Now().UnixMilli())
 	if len(resp) == 0 {
 		return false
 	}
