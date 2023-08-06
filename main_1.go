@@ -39,8 +39,8 @@ func main() {
 const (
 	b       = 1 //1是分解 2是置换
 	actId   = 464
-	Token   = "2ac461a1756a4b92b28b77c2ab9af730"
-	OrderId = 52279772 //yh
+	Token   = "3f521c1cdfd947c99910047873320881"
+	OrderId = 37102632 //yh
 	thread  = 1
 )
 
@@ -217,6 +217,7 @@ func Post(host string, header map[string]string, payload []byte) (body []byte, e
 	resp := &fasthttp.Response{}
 	client := &fasthttp.Client{}
 	if err = client.DoTimeout(req, resp, timeOut); err != nil {
+		log.Println("http.error:%v", err)
 		return
 	}
 	body = resp.Body()
