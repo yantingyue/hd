@@ -37,12 +37,12 @@ func main() {
 }
 
 const (
-	b     = 1 //1是分解 2是置换
-	actId = 471
-	Token = "3f521c1cdfd947c99910047873320881"
-	//OrderId = 65095863 //yh
-	OrderId = 233697725 //yh
-	thread  = 1
+	b       = 1 //1是分解 2是置换
+	actId   = 471
+	Token   = "3f521c1cdfd947c99910047873320881"
+	OrderId = 52363707 //yh
+	//OrderId = 233697725 //yh
+	thread = 1
 )
 
 func Fj() {
