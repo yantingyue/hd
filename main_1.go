@@ -37,11 +37,11 @@ func main() {
 }
 
 const (
-	b     = 1 //1是分解 2是置换
-	actId = 473
+	b     = 2 //1是分解 2是置换
+	actId = 475
 
 	Token   = "3f521c1cdfd947c99910047873320881"
-	OrderId = 64411856 //yh
+	OrderId = 63149518 //yh
 	//OrderId = 233697725 //yh
 	thread = 1
 )
