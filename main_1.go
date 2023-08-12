@@ -38,10 +38,10 @@ func main() {
 
 const (
 	b     = 1 //1是分解 2是置换
-	actId = 479
+	actId = 482
 
 	Token   = "6c5ebf48b0114eb1ad96c6c87866e621"
-	OrderId = 129959797 //yh
+	OrderId = 54932389 //yh
 	//OrderId = 233697725 //yh
 	thread = 1
 )
@@ -55,7 +55,7 @@ func Fj() {
 					go func() {
 						if FjDetail(actId, Token) {
 							go Replace(actId, OrderId, Token)
-							//go Replace(actId, 17537179, "2ac461a1756a4b92b28b77c2ab9af730") //小号
+							//go Replace(actId, 54935440, "2ac461a1756a4b92b28b77c2ab9af730") //小号
 						}
 					}()
 					time.Sleep(time.Millisecond * 20)
