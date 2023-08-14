@@ -56,7 +56,7 @@ func Fj() {
 					go func() {
 						if FjDetail(actId, Token) {
 							go Replace(actId, OrderId, Token)
-							go Replace(actId, 139940479, "42095450261c4613a0bf2068573d4c53")
+							//go Replace(actId, 139940479, "42095450261c4613a0bf2068573d4c53")
 						}
 					}()
 					time.Sleep(time.Millisecond * 20)
