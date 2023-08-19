@@ -37,12 +37,12 @@ func main() {
 }
 
 const (
-	b     = 1 //1是分解 2是置换
-	actId = 488
+	b     = 2 //1是分解 2是置换
+	actId = 489
 
 	//Token   = "1e64306bed264f35800437359c9b4693"
-	Token   = "6c5ebf48b0114eb1ad96c6c87866e621"
-	OrderId = 59532899 //yh
+	Token   = "24715fa709414f6eb364ffb6f8c13485"
+	OrderId = 168011317 //yh
 	//OrderId = 233697725 //yh
 	thread = 2
 )
@@ -129,7 +129,7 @@ func ReplaceDetail(id uint64, token string) bool {
 	//resDetail.Data.StartTimeTimestamp = 1689605160000
 	diffTime := resDetail.Data.StartTimeTimestamp - resTime.CurrentMilliTime
 	log.Println(resDetail.Data.StartTimeTimestamp, resTime.CurrentMilliTime, diffTime)
-	if diffTime < 50 && diffTime > 0 {
+	if diffTime < 100 && diffTime > 0 {
 		//time.Sleep(time.Millisecond * time.Duration(diffTime))
 		log.Println(diffTime, resTime.CurrentMilliTime, resDetail.Data.StartTimeTimestamp, time.Now().UnixMilli())
 		return true
