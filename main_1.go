@@ -38,7 +38,7 @@ func main() {
 
 const (
 	b     = 1 //1是分解 2是置换
-	actId = 489
+	actId = 499
 
 	//Token   = "1e64306bed264f35800437359c9b4693"
 	Token   = "24715fa709414f6eb364ffb6f8c13485"
