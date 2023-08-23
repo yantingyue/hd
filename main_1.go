@@ -52,7 +52,7 @@ func main() {
 
 const (
 	b               = 1                                  //1是分解 2是置换
-	actId           = 504                                //活动id
+	actId           = 508                                //活动id
 	thread          = 2                                  //并发数
 	tokenCommon     = "8c131a620e0441b98fd0f4a3f6d946f4" //勿删
 	tokenYanTingYue = "8c131a620e0441b98fd0f4a3f6d946f4" //颜庭跃
