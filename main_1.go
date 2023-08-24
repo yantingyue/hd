@@ -52,7 +52,7 @@ func main() {
 
 const (
 	b               = 1                                  //1是分解 2是置换
-	actId           = 509                                //活动id
+	actId           = 511                                //活动id
 	thread          = 2                                  //并发数
 	tokenCommon     = "8c131a620e0441b98fd0f4a3f6d946f4" //勿删
 	tokenYanTingYue = "8c131a620e0441b98fd0f4a3f6d946f4" //颜庭跃
@@ -88,17 +88,24 @@ func Fj() {
 				for i := 0; i < thread; i++ {
 					time.Sleep(time.Millisecond * 20)
 					go func() {
-						if ReplaceDetail(actId, tokenCommon) {
-							//颜庭跃
-							go func() {
-								if len(tokenYanTingYue) > 0 {
-									//查看订单详情
-									orderId := GetOrderId(actId, tokenYanTingYue)
-									if orderId > 0 {
-										Replace(actId, orderId, tokenYanTingYue)
-									}
-								}
-							}()
+						var (
+							wg      sync.WaitGroup
+							orderId uint64
+							isSend  bool
+						)
+						wg.Add(1)
+						go func() {
+							defer wg.Done()
+							isSend = ReplaceDetail(actId, tokenCommon)
+						}()
+						wg.Add(1)
+						go func() {
+							defer wg.Done()
+							orderId = GetOrderId(actId, tokenYanTingYue)
+						}()
+						wg.Wait()
+						if isSend && orderId > 0 {
+							Replace(actId, orderId, tokenYanTingYue)
 						}
 					}()
 				}
@@ -172,13 +179,20 @@ func ReplaceDetail(id uint64, token string) bool {
 		resp2, _ = Get("https://api.aichaoliuapp.cn/aiera/current/milli/time")
 	}()
 	wg.Wait()
-	log.Println(string(resp1), resp2)
 	if len(resp1) == 0 || len(resp2) == 0 {
 		return false
 	}
 	json.Unmarshal(resp1, &resDetail)
 	g, _ := json.Marshal(resp2)
 	json.Unmarshal(g, &resTime)
+	//resDetail.Data.StartTimeTimestamp = 1689605160000
+	diffTime := resDetail.Data.StartTimeTimestamp - resTime.CurrentMilliTime
+	log.Println(resDetail.Data.StartTimeTimestamp, resTime.CurrentMilliTime, diffTime)
+	if diffTime < 100 && diffTime > 0 {
+		//time.Sleep(time.Millisecond * time.Duration(diffTime))
+		log.Println(diffTime, resTime.CurrentMilliTime, resDetail.Data.StartTimeTimestamp, time.Now().UnixMilli())
+		return true
+	}
 	if resDetail.Code == 0 && resDetail.Msg == "success" && resTime.CurrentMilliTime >= resDetail.Data.StartTimeTimestamp && resTime.CurrentMilliTime <= resDetail.Data.EndTimestamp {
 		return true
 	}
