@@ -70,51 +70,18 @@ func Fj() {
 					go func() {
 						if FjDetail(actId, tokenCommon) {
 							//颜庭跃
-							var (
-								wg      sync.WaitGroup
-								orderId uint64
-								isSend  bool
-							)
-							wg.Add(1)
 							go func() {
-								defer wg.Done()
-								isSend = FjDetail(actId, tokenCommon)
+								if len(tokenYanTingYue) > 0 {
+									//查看订单详情
+									orderId := GetOrderId(actId, tokenYanTingYue)
+									if orderId > 0 {
+										Replace(actId, orderId, tokenYanTingYue)
+									}
+								}
 							}()
-							wg.Add(1)
-							go func() {
-								defer wg.Done()
-								orderId = GetOrderId(actId, tokenYanTingYue)
-							}()
-							wg.Wait()
-							if isSend && orderId > 0 {
-								Replace(actId, orderId, tokenYanTingYue)
-							}
 						}
 					}()
-					go func() {
-						if FjDetail(actId, tokenCommon) {
-							//颜庭跃
-							var (
-								wg      sync.WaitGroup
-								orderId uint64
-								isSend  bool
-							)
-							wg.Add(1)
-							go func() {
-								defer wg.Done()
-								isSend = FjDetail(actId, tokenCommon)
-							}()
-							wg.Add(1)
-							go func() {
-								defer wg.Done()
-								orderId = GetOrderId(actId, tokenYanTingYueDa)
-							}()
-							wg.Wait()
-							if isSend && orderId > 0 {
-								Replace(actId, orderId, tokenYanTingYueDa)
-							}
-						}
-					}()
+
 				}
 			}
 			//置换
