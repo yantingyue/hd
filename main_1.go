@@ -51,11 +51,12 @@ func main() {
 }
 
 const (
-	b               = 1                                  //1是分解 2是置换
-	actId           = 511                                //活动id
-	thread          = 2                                  //并发数
-	tokenCommon     = "8c131a620e0441b98fd0f4a3f6d946f4" //勿删
-	tokenYanTingYue = "8c131a620e0441b98fd0f4a3f6d946f4" //颜庭跃
+	b                 = 1                                  //1是分解 2是置换
+	actId             = 512                                //活动id
+	thread            = 2                                  //并发数
+	tokenCommon       = "8c131a620e0441b98fd0f4a3f6d946f4" //勿删
+	tokenYanTingYue   = "8c131a620e0441b98fd0f4a3f6d946f4" //颜庭跃
+	tokenYanTingYueDa = "24715fa709414f6eb364ffb6f8c13485" //颜庭跃
 
 )
 
@@ -75,6 +76,15 @@ func Fj() {
 									orderId := GetOrderId(actId, tokenYanTingYue)
 									if orderId > 0 {
 										Replace(actId, orderId, tokenYanTingYue)
+									}
+								}
+							}()
+							go func() {
+								if len(tokenYanTingYueDa) > 0 {
+									//查看订单详情
+									orderId := GetOrderId(actId, tokenYanTingYueDa)
+									if orderId > 0 {
+										Replace(actId, orderId, tokenYanTingYueDa)
 									}
 								}
 							}()
