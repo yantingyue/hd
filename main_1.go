@@ -52,7 +52,7 @@ func main() {
 
 const (
 	b                 = 1                                  //1是分解 2是置换
-	actId             = 513                                //活动id
+	actId             = 514                                //活动id
 	thread            = 2                                  //并发数
 	tokenCommon       = "8c131a620e0441b98fd0f4a3f6d946f4" //勿删
 	tokenYanTingYue   = "8c131a620e0441b98fd0f4a3f6d946f4" //颜庭跃
@@ -70,27 +70,51 @@ func Fj() {
 					go func() {
 						if FjDetail(actId, tokenCommon) {
 							//颜庭跃
+							var (
+								wg      sync.WaitGroup
+								orderId uint64
+								isSend  bool
+							)
+							wg.Add(1)
 							go func() {
-								if len(tokenYanTingYue) > 0 {
-									//查看订单详情
-									orderId := GetOrderId(actId, tokenYanTingYue)
-									if orderId > 0 {
-										Replace(actId, orderId, tokenYanTingYue)
-									}
-								}
+								defer wg.Done()
+								isSend = FjDetail(actId, tokenCommon)
 							}()
+							wg.Add(1)
 							go func() {
-								if len(tokenYanTingYueDa) > 0 {
-									//查看订单详情
-									orderId := GetOrderId(actId, tokenYanTingYueDa)
-									if orderId > 0 {
-										Replace(actId, orderId, tokenYanTingYueDa)
-									}
-								}
+								defer wg.Done()
+								orderId = GetOrderId(actId, tokenYanTingYue)
 							}()
+							wg.Wait()
+							if isSend && orderId > 0 {
+								Replace(actId, orderId, tokenYanTingYue)
+							}
 						}
 					}()
-
+					go func() {
+						if FjDetail(actId, tokenCommon) {
+							//颜庭跃
+							var (
+								wg      sync.WaitGroup
+								orderId uint64
+								isSend  bool
+							)
+							wg.Add(1)
+							go func() {
+								defer wg.Done()
+								isSend = FjDetail(actId, tokenCommon)
+							}()
+							wg.Add(1)
+							go func() {
+								defer wg.Done()
+								orderId = GetOrderId(actId, tokenYanTingYueDa)
+							}()
+							wg.Wait()
+							if isSend && orderId > 0 {
+								Replace(actId, orderId, tokenYanTingYueDa)
+							}
+						}
+					}()
 				}
 			}
 			//置换
