@@ -173,7 +173,7 @@ func ReplaceDetail(id uint64, token string) bool {
 	//resDetail.Data.StartTimeTimestamp = 1689605160000
 	diffTime := resDetail.Data.StartTimeTimestamp - resTime.CurrentMilliTime
 	log.Println(resDetail.Data.StartTimeTimestamp, resTime.CurrentMilliTime, diffTime)
-	if diffTime < 100 && diffTime > 0 {
+	if diffTime < 150 && diffTime > 0 {
 		//time.Sleep(time.Millisecond * time.Duration(diffTime))
 		log.Println(diffTime, resTime.CurrentMilliTime, resDetail.Data.StartTimeTimestamp, time.Now().UnixMilli())
 		return true
