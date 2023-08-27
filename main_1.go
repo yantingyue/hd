@@ -51,8 +51,8 @@ func main() {
 }
 
 const (
-	b                 = 1                                  //1是分解 2是置换
-	actId             = 518                                //活动id
+	b                 = 2                                  //1是分解 2是置换
+	actId             = 519                                //活动id
 	thread            = 2                                  //并发数
 	tokenCommon       = "24b9fe58d01f4374be37623c36f48f2a" //勿删
 	tokenYanTingYue   = "24b9fe58d01f4374be37623c36f48f2a" //颜庭跃
@@ -66,7 +66,6 @@ func Fj() {
 			//分解
 			if b == 1 {
 				for i := 0; i < thread; i++ {
-					time.Sleep(time.Millisecond * 20)
 					go func() {
 						if FjDetail(actId, tokenCommon) {
 							//颜庭跃
@@ -81,35 +80,20 @@ func Fj() {
 							}()
 						}
 					}()
-
+					time.Sleep(time.Millisecond * 20)
 				}
 			}
 			//置换
 			if b == 2 {
 				for i := 0; i < thread; i++ {
-					time.Sleep(time.Millisecond * 20)
 					go func() {
-						var (
-							wg      sync.WaitGroup
-							orderId uint64
-							isSend  bool
-						)
-						wg.Add(1)
-						go func() {
-							defer wg.Done()
-							isSend = ReplaceDetail(actId, tokenCommon)
-						}()
-						wg.Add(1)
-						go func() {
-							defer wg.Done()
-							orderId = GetOrderId(actId, tokenYanTingYue)
-						}()
-						wg.Wait()
-						if isSend && orderId > 0 {
-							Replace(actId, orderId, tokenYanTingYue)
+						if ReplaceDetail(actId, tokenCommon) {
+							Replace(actId, 196932425, tokenYanTingYue)
 						}
 					}()
 				}
+				time.Sleep(time.Millisecond * 20)
+
 			}
 		}
 	}()
