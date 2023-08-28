@@ -51,8 +51,8 @@ func main() {
 }
 
 const (
-	b                 = 2                                  //1是分解 2是置换
-	actId             = 519                                //活动id
+	b                 = 1                                  //1是分解 2是置换
+	actId             = 520                                //活动id
 	thread            = 2                                  //并发数
 	tokenCommon       = "24b9fe58d01f4374be37623c36f48f2a" //勿删
 	tokenYanTingYue   = "24b9fe58d01f4374be37623c36f48f2a" //颜庭跃
@@ -75,6 +75,15 @@ func Fj() {
 									orderId := GetOrderId(actId, tokenYanTingYue)
 									if orderId > 0 {
 										Replace(actId, orderId, tokenYanTingYue)
+									}
+								}
+							}()
+							go func() {
+								if len(tokenYanTingYueDa) > 0 {
+									//查看订单详情
+									orderId := GetOrderId(actId, tokenYanTingYueDa)
+									if orderId > 0 {
+										Replace(actId, orderId, tokenYanTingYueDa)
 									}
 								}
 							}()
