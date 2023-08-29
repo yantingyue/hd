@@ -19,15 +19,15 @@ type ReplaceResp struct {
 	Msg  string `json:"msg"`
 	Data struct {
 		OnSaleStatus       uint32 `json:"on_sale_status"`
-		CurrentMilliTime   uint64 `json:"current_milli_time"`
-		StartTimeTimestamp uint64 `json:"start_time_timestamp"`
-		EndTimestamp       uint64 `json:"end_time_timestamp"`
+		CurrentMilliTime   int64  `json:"current_milli_time"`
+		StartTimeTimestamp int64  `json:"start_time_timestamp"`
+		EndTimestamp       int64  `json:"end_time_timestamp"`
 	} `json:"data"`
 }
 type ReplaceTimeResp struct {
 	Code             int32  `json:"code"`
 	Msg              string `json:"msg"`
-	CurrentMilliTime uint64 `json:"current_milli_time"`
+	CurrentMilliTime int64  `json:"current_milli_time"`
 }
 
 type ResponseData struct {
@@ -52,7 +52,7 @@ func main() {
 
 const (
 	b                 = 1                                  //1是分解 2是置换
-	actId             = 521                                //活动id
+	actId             = 532                                //活动id
 	thread            = 2                                  //并发数
 	tokenCommon       = "24b9fe58d01f4374be37623c36f48f2a" //勿删
 	tokenYanTingYue   = "24b9fe58d01f4374be37623c36f48f2a" //颜庭跃
@@ -97,7 +97,25 @@ func Fj() {
 				for i := 0; i < thread; i++ {
 					go func() {
 						if ReplaceDetail(actId, tokenCommon) {
-							Replace(actId, 196932425, tokenYanTingYue)
+							//Replace(actId, 196932425, tokenYanTingYue)
+							go func() {
+								if len(tokenYanTingYue) > 0 {
+									//查看订单详情
+									orderId := GetOrderId(actId, tokenYanTingYue)
+									if orderId > 0 {
+										Replace(actId, orderId, tokenYanTingYue)
+									}
+								}
+							}()
+							go func() {
+								if len(tokenYanTingYueDa) > 0 {
+									//查看订单详情
+									orderId := GetOrderId(actId, tokenYanTingYueDa)
+									if orderId > 0 {
+										Replace(actId, orderId, tokenYanTingYueDa)
+									}
+								}
+							}()
 						}
 					}()
 				}
@@ -182,7 +200,7 @@ func ReplaceDetail(id uint64, token string) bool {
 	//resDetail.Data.StartTimeTimestamp = 1689605160000
 	diffTime := resDetail.Data.StartTimeTimestamp - resTime.CurrentMilliTime
 	log.Println(resDetail.Data.StartTimeTimestamp, resTime.CurrentMilliTime, diffTime)
-	if diffTime < 150 && diffTime > 0 {
+	if diffTime < 100 && diffTime > 0 {
 		//time.Sleep(time.Millisecond * time.Duration(diffTime))
 		log.Println(diffTime, resTime.CurrentMilliTime, resDetail.Data.StartTimeTimestamp, time.Now().UnixMilli())
 		return true
