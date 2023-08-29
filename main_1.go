@@ -34,7 +34,7 @@ type ResponseData struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
 	Data []struct {
-		OrderID    int    `json:"order_id"`
+		OrderID    uint64 `json:"order_id"`
 		Title      string `json:"title"`
 		Picture    string `json:"picture"`
 		UpdateTime string `json:"update_time"`
@@ -45,108 +45,67 @@ type ResponseData struct {
 }
 
 func main() {
-
-	go Fj()
-	select {}
+	for {
+		if b == 1 {
+			Fj()
+		}
+		if b == 2 {
+			Rp()
+		}
+	}
 }
 
 const (
 	b                 = 1                                  //1是分解 2是置换
-	actId             = 531                                //活动id
-	thread            = 2                                  //并发数
-	tokenCommon       = "24b9fe58d01f4374be37623c36f48f2a" //勿删
+	actId             = 532                                //活动id
 	tokenYanTingYue   = "24b9fe58d01f4374be37623c36f48f2a" //颜庭跃
 	tokenYanTingYueDa = "24715fa709414f6eb364ffb6f8c13485" //颜庭跃
-
 )
 
 func Fj() {
-	go func() {
+	orderInfo := GetOrderId(actId, tokenYanTingYue)
+	if orderInfo.Code == 0 && orderInfo.Msg == "success" && len(orderInfo.Data) > 0 {
 		for {
-			//分解
-			if b == 1 {
-				for i := 0; i < thread; i++ {
-					go func() {
-						if FjDetail(actId, tokenCommon) {
-							//颜庭跃
-							go func() {
-								if len(tokenYanTingYue) > 0 {
-									//查看订单详情
-									orderId := GetOrderId(actId, tokenYanTingYue)
-									if orderId > 0 {
-										Replace(actId, orderId, tokenYanTingYue)
-									}
-								}
-							}()
-							//go func() {
-							//	if len(tokenYanTingYueDa) > 0 {
-							//		//查看订单详情
-							//		orderId := GetOrderId(actId, tokenYanTingYueDa)
-							//		if orderId > 0 {
-							//			Replace(actId, orderId, tokenYanTingYueDa)
-							//		}
-							//	}
-							//}()
-						}
-					}()
-					time.Sleep(time.Millisecond * 20)
-				}
-			}
-			//置换
-			if b == 2 {
-				for i := 0; i < thread; i++ {
-					go func() {
-						if ReplaceDetail(actId, tokenCommon) {
-							//Replace(actId, 196932425, tokenYanTingYue)
-							go func() {
-								if len(tokenYanTingYue) > 0 {
-									//查看订单详情
-									orderId := GetOrderId(actId, tokenYanTingYue)
-									if orderId > 0 {
-										Replace(actId, orderId, tokenYanTingYue)
-									}
-								}
-							}()
-							go func() {
-								if len(tokenYanTingYueDa) > 0 {
-									//查看订单详情
-									orderId := GetOrderId(actId, tokenYanTingYueDa)
-									if orderId > 0 {
-										Replace(actId, orderId, tokenYanTingYueDa)
-									}
-								}
-							}()
-						}
-					}()
-				}
-				time.Sleep(time.Millisecond * 20)
-
+			if FjDetail(actId, tokenYanTingYue) {
+				break
 			}
 		}
-	}()
-
+		for _, v := range orderInfo.Data {
+			go Replace(actId, v.OrderID, tokenYanTingYue)
+			time.Sleep(time.Millisecond * 2000)
+		}
+	}
+	time.Sleep(time.Millisecond * 2000)
 }
 
-func GetOrderId(id uint64, token string) uint64 {
+func Rp() {
+	orderInfo := GetOrderId(actId, tokenYanTingYue)
+	if orderInfo.Code == 0 && orderInfo.Msg == "success" && len(orderInfo.Data) > 0 {
+		for {
+			if ReplaceDetail(actId, tokenYanTingYue) {
+				break
+			}
+		}
+		for _, v := range orderInfo.Data {
+			go Replace(actId, v.OrderID, tokenYanTingYue)
+			time.Sleep(time.Millisecond * 2000)
+		}
+	}
+	time.Sleep(time.Millisecond * 2000)
+}
+
+func GetOrderId(id uint64, token string) (res ResponseData) {
 	header := GenerateHeader1(token)
 	body := map[string]interface{}{
 		"replace_id": id,
 		"pageNumber": 1,
-		"pageSize":   20,
+		"pageSize":   5,
 	}
 	jsonBytes, _ := json.Marshal(body)
 	resp, _ := Post("https://api.aichaoliuapp.cn/aiera/ai_match_trading/nft/combination/choice/material", header, jsonBytes)
 	log.Println(string(resp))
-	if len(resp) == 0 {
-		return 0
-	}
-	res := ResponseData{}
 	json.Unmarshal(resp, &res)
-	if res.Code == 0 && res.Msg == "success" && len(res.Data) > 0 {
-		return uint64(res.Data[0].OrderID)
-	}
-	return 0
-
+	return res
 }
 
 func FjDetail(id uint64, token string) bool {
