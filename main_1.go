@@ -78,15 +78,15 @@ func Fj() {
 									}
 								}
 							}()
-							go func() {
-								if len(tokenYanTingYueDa) > 0 {
-									//查看订单详情
-									orderId := GetOrderId(actId, tokenYanTingYueDa)
-									if orderId > 0 {
-										Replace(actId, orderId, tokenYanTingYueDa)
-									}
-								}
-							}()
+							//go func() {
+							//	if len(tokenYanTingYueDa) > 0 {
+							//		//查看订单详情
+							//		orderId := GetOrderId(actId, tokenYanTingYueDa)
+							//		if orderId > 0 {
+							//			Replace(actId, orderId, tokenYanTingYueDa)
+							//		}
+							//	}
+							//}()
 						}
 					}()
 					time.Sleep(time.Millisecond * 20)
